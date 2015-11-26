@@ -1,0 +1,71 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<title>observer input length</title>
+</head>
+<body>
+	<input id="J_label" type="text" />
+	<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.min.js"></script>
+	<script type="text/javascript">
+		var Class = (function() {
+			var Class = function() {};
+			var _mix = function(origin, source) {
+				for (var p in source) {
+					if(source.hasOwnProperty(p)) {
+						origin[p] = source[p];
+					}
+				}
+			};
+			var _extend = function() {
+				this.initPrototype = true;
+				var prototype = new this();
+				this.initPrototype = false;
+				var items = Array.prototype.slice.call(arguments) || [];
+				var item;
+				while (item = items.shift()) {
+					_mix(prototype, item.prototype || item);
+				}
+				var SubClass = function() {
+					if(!SubClass.initPrototype && this.init) {
+						this.init.apply(this, arguments);
+					}
+				};
+				SubClass.prototype = prototype;
+				SubClass.prototype.constructor = SubClass;
+				SubClass.extend = _extend;
+				return SubClass;
+			};
+			Class.extend = _extend;
+			return Class;
+		})();
+
+		var TextCount = Class.extend({
+			init: function(config) {
+				this.input = $(config.id);
+				this._bind();
+				this.render();
+			},
+			_bind: function() {
+				var self = this;
+				this.input.on('keyup', function() {
+					self.render();
+				});
+			},
+			_getNum: function() {
+				return this.input.val().length;
+			},
+			render: function() {
+				var num = this._getNum();
+				if($('#J_text').length === 0) {
+					this.input.after('<span id="J_text"></span>');
+				}
+				$('#J_text').html(num + ' words');
+			}
+		});
+		$(document).ready(function() {
+			new TextCount({id: '#J_label'});
+		});
+	</script>
+</body>
+</html>

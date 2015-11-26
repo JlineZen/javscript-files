@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<title>javascript async way 1</title>
+</head>
+<body>
+	<script type="text/javascript">
+	  /** way one to resolve async problem**/
+	  (function(window) {
+	  	var uid = 1;
+	  	var indexOf = Array.prototype.indexOf || function(key) {
+	  		for (var i = 0, len = this.length; i < len; i++) {
+	  			if (this[i] === key) return i;
+	  		}
+	  		return -1;
+	  	};
+	  	var Async = function() {
+	  		this.map = {};
+	  		this.record = {};
+	  	};
+	  	var fire = function(callback, scope) {
+	  		setTimeout(function() {
+	  			callback.call(scope);
+	  		}, 0);
+	  	};
+	  	Async.prototype = {
+	  		wait: function(resources, callback, scope) {
+	  			var map = this.map, record = this.record;
+	  			if (typeof resources === 'string') resources = [resources];
+	  			var uid = (uid++).toString(16);
+	  			map[uid] = {
+	  				waiting : resources.slice(0),
+	  				callback: callback,
+	  				scope   : scope
+	  			};
+	  			for (var i = 0, len = resources.length; i < len; i++) {
+	  				var res = resources[i],
+	  						list = record[res] || ( record[res] = []);
+	  				list.push(uid);		
+	  			}
+	  			return this;
+	  		},
+	  		trigger: function(resources) {
+	  			if (!resources) return this;
+	  			var map = this.map, record = this.record;
+	  			if(typeof resources === 'string') resources = [resources];
+	  			for (var i = 0, len = resources.length; i < len; i++) {
+	  				var res = resources[i];
+	  				if (typeof record[res] === 'undefined') continue;
+	  				this._release(res, record[res]);
+	  				delete record[res];
+	  			}
+	  			return this;
+	  		},
+	  		_release: function(res, list) {
+	  			var map = this.map, record = this.record;
+	  			for (var i = 0, len = list.length; i < len; i++) {
+	  				var uid = list[i], mapItem = map[uid], waiting = mapItem.waiting;
+	  				var pos = waiting.indexOf(res);
+	  				waiting.splice(pos, 1);
+	  				if(waiting.length == 0) {
+	  					fire(mapItem.callback, mapItem.scope);
+	  					delete map[uid];
+	  				}
+	  			}
+	  		}
+	  	};
+
+	  	window.Async = Async;
+	  })(window);
+
+	  var follow = new Async();
+
+	  follow.wait(['A','B'], function() { console.log('done')}).trigger(['A','B'])
+	</script>
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<script type="text/javascript" src="class.js"></script>
+	<title>Class</title>
+</head>
+<body>
+	<script type="text/javascript">
+		var Animal = Class.extend({
+			init: function(opts) {
+				this.msg = opts.msg;
+				this.type = 'animal';
+			},
+			say: function() {
+				console.log(this.msg + ': i am a ' + this.type);
+			}
+		});
+
+		var Dog = Animal.extend({
+			init: function(opts) {
+				Animal.prototype.init.call(this, opts);
+				this.type = 'dog';
+			}
+		});
+
+		new Dog({msg: 'Hi'}).say();
+	</script>
+</body>
+</html>
