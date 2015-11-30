@@ -1,0 +1,176 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<script src="http://cdn.bootcss.com/jquery/1.9.1/jquery.min.js"></script>
+	<title>datalist</title>
+</head>
+<body>
+	<script type="text/javascript">
+		var item = function(value, text) {
+			this.attribute = {
+				id      : '',
+				value   : value ? value : '',
+				text    : text ? text : '',
+				title   : '',
+				selected: ''
+			};
+			this.htmlElement = null;
+			this.callback = {
+				onclick: null
+			};
+		};
+
+		item.prototype.bindEvent = function() {
+			var self = this;
+			var element = self.htmlElement;
+			if (self.callback.onclick) {
+				element.unbind('click');
+				element.bind('click', function() {
+					 self.callback.onclick.call(self);
+				});
+			}
+		};
+
+		var dropDownList = function(id) {
+			this.attribute = {
+				id: id
+			};
+			this.style = {
+				width: '',
+				height: ''
+			};
+			this.callback = {
+				onSelectedChanged: null,
+				onClick: null
+			};
+			this.htmlElement = null;
+			this.items = [];
+			this.selectedValue = '';
+			this.selectedItem = {};
+			this.dataSourceType = '';
+			this.dataSource = {};
+			this.dataTextField = '';
+			this.dataValueField = '';
+			this.dataTitleField = '';
+		};
+
+		dropDownList.prototype.bindEvent = function() {
+			var self = this;
+			var element = self.htmlElement;
+			if(self.callback.onSelectedChanged) {
+				element.unbind('change');
+				element.bind('change', function() {
+					self.callback.onSelectedChanged.call(self);
+				});
+			}
+			if(self.callback.onClick) {
+				element.unbind('click');
+				element.bind('change', function() {
+					self.callback.onClick.call(self);
+				});
+			}
+		};
+		dropDownList.prototype.dataBind = function(element) {
+			var self = this;
+			self.htmlElement = $('<select id="' + self["attribute"]["id"] + '"></select>');
+			$.each(self.dataSource, function(itemKey, itemValue) {
+				var _item = new item();
+				_item['attribute']['value'] = itemValue[self['dataValueField']];
+				_item['attribute']['text'] = itemValue[self['dataTextField']];
+				_item['attribute']['title'] = itemValue[self['dataTitleField']];
+				self.items.push(_item);
+				self.insertItem(_item);
+			});
+
+			self.styleLoad();
+			element.append(self.htmlElement);
+		};
+		dropDownList.prototype.styleLoad = function() {
+			var self = this;
+			var element = self.htmlElement;
+			$.each(self['style'], function(styleKey, styleValue){
+				if(styleValue) {
+					element.css(styleKey, styleValue);
+				}
+			});
+		};
+
+		dropDownList.prototype.insertItem = function(optionItem) {
+			var self = this,
+					element = self.htmlElement,
+					itmeSelf = optionItem,
+					option = $('<option></option>'),
+					optionAttribute = optionItem['attribute'],
+					id = optionAttribute['id'],
+					value = optionAttribute['value'],
+					text = optionAttribute['text'],
+					title = optionAttribute['title'],
+					selected = optionAttribute['selected'];
+			if(value && value.length > 0) {
+				option.attr('value', value);
+			}	
+			if(title && title.length > 0) {
+				option.attr('title', title);
+			}
+			if(selected && selected.length > 0) {
+				option.attr('selected', selected);
+			}	
+			if(text && text.length > 0) {
+				option.text(text);
+			}
+			itmeSelf.htmlElement = option;
+			element.append(option);
+		}
+	</script>
+	<script type="text/javascript">
+		$(document).ready(function() {
+			var data = [];
+			for(var i = 0; i < 3; i++) {
+				data[i] = {};
+				data[i]["v"] = "value_" + i.toString();
+				data[i]["t"] = "text_" + i.toString();
+			}
+
+			var $div = $('#divwl'),
+					drop1 = new dropDownList('drop1');
+			drop1.dataSource = data;
+			drop1.dataValueField = "v";
+			drop1.dataTextField = "t";
+			drop1.dataTitleField = "title";
+			drop1.dataBind($div);	
+			for(var i = 0; i < 3; i++) {
+				var v = "insertValue_" + i,
+						t = 'insertText_' + i,
+						_item = new item(v, t);
+				drop1.insertItem(_item);		
+			}	
+			drop1.style.width = '180px';
+			drop1.style.height = '30px';
+			drop1.style.background = '#fff';
+			drop1.style.border = '1px solid #ddd';
+			drop1.style.outline = 'none';
+			drop1.styleLoad();
+			var funClick = function() {
+				var dropSelf = this.htmlElement,
+						selectedValue = dropSelf.val(),
+						$div1 = $('#text');
+						console.log(selectedValue);
+				$div1.html(selectedValue);		
+			}
+			var funChange = function () {
+          var dropSender = this.htmlElement;
+          var selectedValue = dropSender.val()
+      };
+
+      drop1.items[1].callback.onClick = funClick;
+      drop1.items[1].bindEvent();
+
+      drop1.callback.onSelectedChanged = funChange;
+      drop1.bindEvent();
+		});
+	</script>
+	<div id="divwl"></div>
+  <div id="text"></div>
+</body>
+</html>
