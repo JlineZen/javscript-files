@@ -1,0 +1,30 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<title>javascript closures</title>
+</head>
+<body>
+	<ul>
+		<li>1</li>
+		<li>2</li>
+		<li>3</li>
+		<li>4</li>
+		<li>5</li>
+	</ul>
+	<script type="text/javascript">
+		window.onload = function() {
+			var li = document.querySelectorAll('li'),
+					i = 0,
+					len = li.length;
+			for (; i < len; i++) {
+				(function(n) {
+					li[n].addEventListener('click', function() {
+						this.innerHTML = 'Your have clicked me!, My original text is ' + ( n + 1);
+					}, false);
+				})(i);
+			}		
+		};
+	</script>
+</body>
+</html>

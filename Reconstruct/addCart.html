@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=UTF-8">
+	<script src="http://cdn.bootcss.com/jquery/1.8.3/jquery.js"></script>
+	<title>add to cart</title>
+</head>
+<body>
+	<h2>products</h2>
+	<ul id="products"></ul>
+	<h2>your carts</h2>
+	<ul id="cart"></ul>
+	<script type="text/javascript">
+		function Product(id, description) {
+			this.getId = function() {
+				return id;
+			};
+			this.getDescription = function() {
+				return description;
+			}
+		}
+
+		function Cart(eventAggregator) {
+			var items = [];
+			this.addItem = function(item) {
+				items.push(item);
+			};
+		}
+
+		(function() {
+			var products = [
+											new Product(1, "Star Wars Lego Ship"),
+											new Product(2, "Barbie Doll"),
+											new Product(3, "Remote Control Airplane")
+										 ],
+					cart = new Cart();
+					
+					function addToCart() {
+						var productId = $(this).attr('id-attr');
+						var product = $.grep(products, function(x) {
+							return x.getId() == productId;
+						})[0];
+						cart.addItem(product);
+
+						var newItem = $('<li></li>').html(product.getDescription())
+																				.attr('id-attr', product.getId())
+																				.appendTo('#cart');
+					}	
+
+					products.forEach(function(product) {
+						var newItem = $('<li></li>')
+													.html(product.getDescription())
+													.attr('id-attr', product.getId())
+													.dblclick(addToCart)
+													.appendTo('#products');
+					});					 
+
+
+		})();
+	</script>
+</body>
+</html>
